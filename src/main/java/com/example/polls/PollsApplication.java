@@ -9,17 +9,19 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import java.util.TimeZone;
 
 @SpringBootApplication
-@EntityScan(basePackageClasses={
-		PollsApplication.class,
-		Jsr310JpaConverters.class
+@EntityScan(basePackageClasses = {
+        PollsApplication.class,
+        Jsr310JpaConverters.class
 })
 public class PollsApplication {
-	@PostConstruct
-	void init(){TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-	}
 
-	public static void main(String[] args) {
-		SpringApplication.run(PollsApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PollsApplication.class, args);
+    }
+
+    @PostConstruct
+    void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
 }

@@ -1,9 +1,8 @@
 package com.example.polls.security;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.SignatureException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
+    private static final Logger logger = LogManager.getLogger(JwtTokenProvider.class);
 
     @Value("${app.jwtSecret}")
     private String jwtSecret;
@@ -22,16 +21,15 @@ public class JwtTokenProvider {
     private int jwtExpirationInMs;
 
     public String generateToken(Authentication authentication) {
-
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+        Date expirydate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
                 .setSubject(Long.toString(userPrincipal.getId()))
                 .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
+                .setExpiration(expirydate)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
@@ -39,7 +37,7 @@ public class JwtTokenProvider {
     public Long getUserIdFromJWT(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
+                .parseClaimsJwt(token)
                 .getBody();
 
         return Long.parseLong(claims.getSubject());

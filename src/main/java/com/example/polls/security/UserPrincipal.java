@@ -1,7 +1,6 @@
 package com.example.polls.security;
 
 import com.example.polls.model.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,10 +17,8 @@ public class UserPrincipal implements UserDetails {
 
     private final String username;
 
-    @JsonIgnore
     private final String email;
 
-    @JsonIgnore
     private final String password;
 
     private final Collection<? extends GrantedAuthority> authorities;
