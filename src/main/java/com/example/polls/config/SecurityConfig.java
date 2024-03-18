@@ -66,19 +66,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.
                         requestMatchers("/",
                                 "/favicon.ico",
-                                "/.png",
-                                "/.gif",
-                                "/.svg",
-                                "/.jpg",
-                                "/.html",
-                                "/.css",
-                                "/.js")
+                                "/**.png",
+                                "/**.gif",
+                                "/**.svg",
+                                "/**.jpg",
+                                "/**.html",
+                                "/**.css",
+                                "/**.js")
                         .permitAll()
-                        .requestMatchers("/api/auth/")
+                        .requestMatchers("/api/auth/**")
                         .permitAll()
                         .requestMatchers("/api/user/checkUsernameAvailability", "/api/user/checkEmailAvailability")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/polls/", "/api/users/")
+                        .requestMatchers(HttpMethod.GET, "/api/polls/**", "/api/users/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
