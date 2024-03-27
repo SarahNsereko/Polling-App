@@ -1,6 +1,8 @@
 package com.example.polls.controller;
 
 import com.example.polls.exception.ResourceNotFoundException;
+import com.example.polls.model.Role;
+import com.example.polls.model.RoleName;
 import com.example.polls.model.User;
 import com.example.polls.payload.*;
 import com.example.polls.repository.PollRepository;
@@ -10,17 +12,20 @@ import com.example.polls.security.CurrentUser;
 import com.example.polls.security.UserPrincipal;
 import com.example.polls.service.PollService;
 import com.example.polls.util.AppConstants;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
 public class UserController {
 
-    private static final Logger logger = LogManager.getLogger(UserController.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -33,7 +38,18 @@ public class UserController {
     @GetMapping("/user/me")
     @PreAuthorize("hasRole('USER')")
     public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
-        return new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName());
+
+        ArrayList<RoleName> roles = new ArrayList<>();
+
+        Optional<User> user = userRepository.findById(currentUser.getId());
+
+        for (Role role : user.get().getRoles()) {
+            roles.add(role.getName());
+        }
+
+        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName(),
+                roles);
+        return userSummary;
     }
 
     @GetMapping("/user/checkUsernameAvailability")
@@ -53,10 +69,13 @@ public class UserController {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 
-        Long pollCount = pollRepository.countByCreatedBy(user.getId());
-        Long voteCount = voteRepository.countByUserId(user.getId());
+        long pollCount = pollRepository.countByCreatedBy(user.getId());
+        long voteCount = voteRepository.countByUserId(user.getId());
 
-        return new UserProfile(user.getId(), user.getUsername(), user.getName(), user.getCreatedAt(), pollCount, voteCount);
+        UserProfile userProfile = new UserProfile(user.getId(), user.getUsername(), user.getName(), user.getCreatedAt(),
+                pollCount, voteCount);
+
+        return userProfile;
     }
 
     @GetMapping("/users/{username}/polls")
@@ -67,7 +86,6 @@ public class UserController {
         return pollService.getPollsCreatedBy(username, currentUser, page, size);
     }
 
-
     @GetMapping("/users/{username}/votes")
     public PagedResponse<PollResponse> getPollsVotedBy(@PathVariable(value = "username") String username,
                                                        @CurrentUser UserPrincipal currentUser,
@@ -75,4 +93,5 @@ public class UserController {
                                                        @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
         return pollService.getPollsVotedBy(username, currentUser, page, size);
     }
+
 }
